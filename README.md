@@ -13,7 +13,7 @@ semantic-sh is a SimHash implementation to detect and group similar texts by tak
 # Installing via pip
 
 ```sh
-$ pip install semantic_sh
+$ pip install semantic-sh
 ```
 # Notes
 
@@ -24,7 +24,7 @@ $ pip install semantic_sh
 # Usage
 
 ```
-from semantic_sh import SemanticSimHash
+from semantic_sh.semantic_sh import SemanticSimHash
 ```
 
 ### Use with fasttext:
@@ -95,6 +95,7 @@ represantation of the text.
 
  - Add word2vec and GloVe support
  - Add batch processing for BERT models
+ - Fix import scheme
 
 License
 ----
