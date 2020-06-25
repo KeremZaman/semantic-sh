@@ -4,7 +4,7 @@ setup(
     name='semantic_sh',
     version='1.0',
     packages=['semantic_sh'],
-    url='www.github.com/KeremZaman/semantic_sh',
+    url='www.github.com/KeremZaman/semantic-sh',
     license='MIT',
     author='Kerem Zaman',
     author_email='',
