@@ -24,7 +24,7 @@ $ pip install semantic-sh
 # Usage
 
 ```
-from semantic_sh.semantic_sh import SemanticSimHash
+from semantic_sh import SemanticSimHash
 ```
 
 ### Use with fasttext:
