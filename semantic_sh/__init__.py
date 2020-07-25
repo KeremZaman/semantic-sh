@@ -1,1 +1,2 @@
-from . import semantic_sh
+from .semantic_sh import SemanticSimHash
+
