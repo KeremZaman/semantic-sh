@@ -10,6 +10,7 @@ semantic-sh is a SimHash implementation to detect and group similar texts by tak
  - transformers
  - pytorch
  - numpy
+ - flask
 # Installing via pip
 
 ```sh
@@ -84,6 +85,82 @@ Get all similar document groups which have more than 1 document
 for docs in sh.get_similar_groups():
    print(docs)
 ```
+# API Server
+Easily deploy a simple text similarity engine on web.
+
+## Installation
+```sh 
+$ git clone https://github.com/KeremZaman/semantic-sh.git
+```
+
+## Standalone Usage
+```
+server.py [-h] [--host HOST] [--port PORT] [--model-type MODEL_TYPE]
+                 [--model-path MODEL_PATH] [--key-size KEY_SIZE] [--dim DIM]
+                 [--stop-words [STOP_WORDS [STOP_WORDS ...]]]
+
+optional arguments:
+  -h, --help            show this help message and exit
+
+app:
+  --host HOST
+  --port PORT
+
+model:
+  --model-type MODEL_TYPE
+                        Type of model to run: fasttext or any pretrained model
+                        name from huggingface/transformers
+  --model-path MODEL_PATH
+                        Path to vector files of fasttext models
+  --key-size KEY_SIZE   Hash length in bits
+  --dim DIM             Dimension of text representations according to chosen
+                        model type
+  --stop-words [STOP_WORDS [STOP_WORDS ...]]
+                        List of stop words to exclude
+
+```
+
+## Using with WSGI Container
+```
+from gevent.pywsgi import WSGIServer
+from server import init_app
+
+app = init_app(params) # same params as initialize SemantcSimHash object
+
+http_server = WSGIServer(('', 5000), app)
+http_server.serve_forever()
+```
+
+**NOTE:** Sample code uses gevent but you can use any WSGI container which can be used with Flask app object instead.
+
+## API Reference
+
+
+```GET /api/hash?text=<text>```
+
+Return hash of given text 
+
+***
+
+```GET /api/add?text=<text>```
+
+Add given text as document
+***
+
+```GET /api/find-similar?text=<text>```
+
+Return similar documents to given text
+*** 
+
+```GET /api/distance?src=<src_text>&tgt=<tgt_txt>```
+
+Return Hamming distance between source and target texts
+***
+
+```GET /api/similarity-groups```
+
+Return buckets having more than one document
+ 
 
 # Some Implementation Details
 
