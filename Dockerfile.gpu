@@ -3,7 +3,6 @@ FROM nvidia/cuda:10.2-cudnn7-devel-ubuntu18.04
 RUN apt-get update && \
     apt-get install -y sudo \
     build-essential \
-    curl \
     libcurl4-openssl-dev \
     libssl-dev \
     wget \
@@ -13,8 +12,6 @@ RUN apt-get update && \
     libxext6 \
     libsm6 \
     openssl \
-    nano \
-    bash \
     git
 
 RUN mkdir -p /opt/service
