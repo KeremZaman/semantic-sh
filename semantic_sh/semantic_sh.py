@@ -22,6 +22,7 @@ class SemanticSimHash(object):
         self._type = model_type
 
         self._thresh = thresh
+        self.key_size = key_size
         self._proj = self._create_proj(key_size, dim)
         self._stop_words = stop_words
 
@@ -101,11 +102,16 @@ class SemanticSimHash(object):
 
     def find_similar(self, txt: str) -> List[str]:
         """Hash text and return all texts inside that bucket."""
-        return self._buckets[self.get_hash(txt)]
+        h = self.get_hash(txt)
+        if h in self._buckets:
+            return self._buckets[h]
+        else:
+            return []
 
     def get_distance(self, txt0: str, txt1: str) -> int:
         """Return hamming distance of the hashes of given text pair."""
         diff = self.get_hash(txt0) ^ self.get_hash(txt1)
+        diff &= (1 << self.key_size) - 1  # get 2's complement representation of negative numbers
         dist = sum(map(int, bin(diff)[2:]))  # [2:] to exclude '0b' part
         return dist
 
