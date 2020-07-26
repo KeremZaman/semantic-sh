@@ -172,7 +172,7 @@ represantation of the text.
 
  - Add word2vec and GloVe support
  - Add batch processing for BERT models
- - Fix import scheme
+ - ~~Fix import scheme~~
 
 License
 ----
