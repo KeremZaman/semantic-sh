@@ -165,7 +165,7 @@ Return buckets having more than one document
 
 Run the api server on port 4000
 ```sh
-docker run -ti -p 4000:4000 semantic-sh:latest --port=4000 --model-type=bert-base-multilingual-cased
+docker run -ti -p 4000:4000 -v `pwd`/data:/opt/data  semantic-sh:latest --port=4000 --model-type=bert-base-multilingual-cased --model-path=/opt/data
 ```
 
 ## With docker-compose 
