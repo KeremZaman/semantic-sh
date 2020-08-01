@@ -1,0 +1,18 @@
+---
+version: '3.8'
+services:
+ 
+   semantic-sh:
+     image: semantic-sh:latest
+     container_name: semantic-sh
+     build:
+       context: .
+       dockerfile: Dockerfile
+     ports:
+     - 4000:4000
+     volumes:
+     - models-data:/opt/data
+     command: ["--host", "${host}", "--port", "${port}", "--model-type", "${model_type}", "--model-path", "${model_path}", "--dim", "${dim}", "--key-size", "${key_size}"]
+
+volumes:
+  models-data:

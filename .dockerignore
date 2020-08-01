@@ -1,0 +1,7 @@
+Dockerfile
+Dockerfile.gpu
+docker-compose.yml
+.git
+.git/
+.git/*
+.git/**
