@@ -6,6 +6,7 @@ import torch
 import string
 import os
 import errno
+import pickle
 
 from transformers import BertModel, BertTokenizer
 import fasttext
@@ -81,6 +82,20 @@ class SemanticSimHash(object):
             return self._get_fasttext_encoding(text)
         else:
             return self._get_bert_encoding(text)
+
+    def save(self, fname: str):
+        """Dump all class members to file"""
+        with open(fname, 'wb') as f:
+            pickle.dump(self, f)
+
+    @staticmethod
+    def load(fname: str) -> 'SemanticSimHash':
+        """Load serialized state"""
+        with open(fname, 'rb') as f:
+            obj = pickle.load(f)
+
+        return obj
+
 
     def get_hash(self, txt: str) -> int:
         """Encode text, multiply with projection matrix, create hash and return it."""

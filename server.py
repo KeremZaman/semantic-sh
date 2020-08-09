@@ -58,6 +58,9 @@ if __name__ == '__main__':
     model_group.add_argument('--dim', required=False, type=int, default=300, help='Dimension of text representations according to chosen model type')
     model_group.add_argument('--stop-words', nargs='*', help='List of stop words to exclude')
 
+    loader_group = parser.add_argument_group('loader')
+    loader_group.add_argument('--load-from', required=False, help='Load previously saved state')
+
     args = parser.parse_args()
 
     # Save each argument group to dict to make separately accessible
@@ -66,6 +69,7 @@ if __name__ == '__main__':
         group_dict = {action.dest: getattr(args, action.dest, None) for action in group._group_actions}
         arg_groups[group.title] = group_dict
 
-    sh = SemanticSimHash(**arg_groups['model'])
+    fname = arg_groups['loader']['load_from']
+    sh = SemanticSimHash.load(fname) if fname else SemanticSimHash(**arg_groups['model'])
 
     app.run(**arg_groups['app'])

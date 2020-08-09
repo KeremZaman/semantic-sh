@@ -12,7 +12,7 @@ services:
      - 4000:4000
      volumes:
      - models-data:/opt/data
-     command: ["--host", "${host}", "--port", "${port}", "--model-type", "${model_type}", "--model-path", "${model_path}", "--dim", "${dim}", "--key-size", "${key_size}"]
+     command: ["--host", "${host}", "--port", "${port}", "--model-type", "${model_type}", "--model-path", "${model_path}", "--dim", "${dim}", "--key-size", "${key_size}", "--load-from", "${load_from}"]
 
 volumes:
   models-data:
