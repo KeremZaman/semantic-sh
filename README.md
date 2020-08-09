@@ -85,6 +85,23 @@ Get all similar document groups which have more than 1 document
 for docs in sh.get_similar_groups():
    print(docs)
 ```
+
+### Save data
+
+Save added documents, hash function, model and parameters
+
+```
+sh.save('model.dat')
+```
+
+### Load from saved file
+
+Load all parameters, documents, hash function and model from saved file
+
+```
+sh = SemanticSimHash.load('model.dat')
+```
+
 # API Server
 Easily deploy a simple text similarity engine on web.
 
@@ -98,6 +115,7 @@ $ git clone https://github.com/KeremZaman/semantic-sh.git
 server.py [-h] [--host HOST] [--port PORT] [--model-type MODEL_TYPE]
                  [--model-path MODEL_PATH] [--key-size KEY_SIZE] [--dim DIM]
                  [--stop-words [STOP_WORDS [STOP_WORDS ...]]]
+                 [--load-from LOAD_FROM]
 
 optional arguments:
   -h, --help            show this help message and exit
@@ -117,6 +135,10 @@ model:
                         model type
   --stop-words [STOP_WORDS [STOP_WORDS ...]]
                         List of stop words to exclude
+
+loader:
+  --load-from LOAD_FROM
+                        Load previously saved state
 
 ```
 
