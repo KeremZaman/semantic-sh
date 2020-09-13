@@ -96,7 +96,6 @@ class SemanticSimHash(object):
 
         return obj
 
-
     def get_hash(self, txt: str) -> int:
         """Encode text, multiply with projection matrix, create hash and return it."""
         enc = self._get_encoding(txt)
@@ -106,14 +105,16 @@ class SemanticSimHash(object):
 
         return hash_val
 
-    def add_document(self, txt: str) -> None:
-        """Hash text and add to its bucket."""
+    def add_document(self, txt: str) -> int:
+        """Hash text, add to its bucket, return hash of text."""
         h = self.get_hash(txt)
 
         if h in self._buckets:
             self._buckets[h].append(txt)
         else:
             self._buckets[h] = [txt]
+
+        return h
 
     def find_similar(self, txt: str) -> List[str]:
         """Hash text and return all texts inside that bucket."""

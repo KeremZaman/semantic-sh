@@ -23,8 +23,8 @@ def generate_hash():
 @app.route('/api/add', methods=['GET'])
 def add():
     txt = request.args['text']
-    sh.add_document(txt)
-    return jsonify(sucess=True)
+    h = sh.add_document(txt)
+    return jsonify(hex(h))
 
 
 @app.route('/api/find-similar', methods=['GET'])
