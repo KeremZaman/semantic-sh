@@ -14,34 +14,44 @@ def init_app(**kwargs):
     return app
 
 
-@app.route('/api/hash', methods=['GET'])
+@app.route('/api/hash', methods=['POST'])
 def generate_hash():
-    txt = request.args['text']
-    return hex(sh.get_hash(txt))
+    req_json = request.get_json()
+    
+    docs = req_json.get('documents')
+    # convert negative hashes to 2's complement representation
+    return jsonify({'hashes': [hex(h & (2**sh.key_size-1)) for h in sh.get_hash(docs)]})
 
 
-@app.route('/api/add', methods=['GET'])
+@app.route('/api/add', methods=['POST'])
 def add():
-    txt = request.args['text']
-    h = sh.add_document(txt)
-    return jsonify(hex(h))
+    req_json = request.get_json()
+    hashes, ids = sh.add_document(req_json.get('documents'))
+    return jsonify({'documents': [{'id': doc_id, 'hash': hex(h & (2**sh.key_size-1))} for doc_id, h in zip(ids, hashes)]})
 
 
-@app.route('/api/find-similar', methods=['GET'])
+@app.route('/api/find-similar', methods=['POST'])
 def find_similar():
-    similar_texts = sh.find_similar(request.args['text'])
-    return jsonify(similar_texts)
+    req_json = request.get_json()
+    similar_texts = sh.find_similar(req_json.get('text'))
+    return jsonify({'similar_texts': similar_texts})
 
 
-@app.route('/api/distance', methods=['GET'])
+@app.route('/api/distance', methods=['POST'])
 def get_distance():
-    txt0, txt1 = request.args['src'], request.args['tgt']
-    return str(sh.get_distance(txt0, txt1))
+    req_json = request.get_json()
+    txt0, txt1 = req_json.get('src'), req_json.get('tgt')
+    return jsonify({'distance': sh.get_distance(txt0, txt1)})
 
 
 @app.route('/api/similarity-groups', methods=['GET'])
 def get_groups():
     return jsonify([group for group in sh.get_similar_groups()])
+
+
+@app.route('/api/text/<int:id>', methods=['GET'])
+def get_text(id):
+    return sh.get_doc_by_id(id)
 
 
 if __name__ == '__main__':
