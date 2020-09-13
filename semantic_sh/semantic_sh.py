@@ -1,4 +1,4 @@
-from typing import List, Optional, Generator
+from typing import List, Optional, Generator, Tuple
 
 import numpy as np
 import torch
@@ -19,6 +19,8 @@ class SemanticSimHash(object):
         """Initialize projection matrix, model and buckets, assign given args to class members."""
 
         self._buckets = {}
+        self._doc2id = {}
+        self._documents = []
 
         self._type = model_type
 
@@ -111,23 +113,31 @@ class SemanticSimHash(object):
 
         return hash_vals
 
-    def add_document(self, documents: List[str]) -> List[int]:
+    def add_document(self, documents: List[str]) -> Tuple[List[int], List[int]]:
         """Hash text, add to its bucket, return hash of text."""
         hashes = self.get_hash(documents)
+        ids = []
 
         for h, txt in zip(hashes, documents):
-            if h in self._buckets:
-                self._buckets[h].append(txt)
-            else:
-                self._buckets[h] = [txt]
 
-        return hashes
+            if txt not in self._doc2id:
+                self._doc2id[txt] = len(self._documents)
+                self._documents.append(txt)
+
+            ids.append(self._doc2id[txt])
+
+            if h in self._buckets:
+                self._buckets[h].append(self._doc2id[txt])
+            else:
+                self._buckets[h] = [self._doc2id[txt]]
+
+        return hashes, ids
 
     def find_similar(self, txt: str) -> List[str]:
         """Hash text and return all texts inside that bucket."""
         h = self.get_hash([txt])[0]
         if h in self._buckets:
-            return self._buckets[h]
+            return [self._documents[id] for id in self._buckets[h]]
         else:
             return []
 
@@ -143,3 +153,11 @@ class SemanticSimHash(object):
         for group in self._buckets.values():
             if len(group) > 1:
                 yield group
+
+    def get_doc_by_id(self, doc_id: int):
+        """
+
+        :param doc_id:
+        :return:
+        """
+        return self._documents[doc_id]
