@@ -166,7 +166,7 @@ Return hash of given text
 
 ```GET /api/add?text=<text>```
 
-Add given text as document
+Add given text as document and return hash of the text
 ***
 
 ```GET /api/find-similar?text=<text>```
