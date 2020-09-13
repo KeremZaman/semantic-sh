@@ -24,6 +24,7 @@ class SemanticSimHash(object):
 
         self._thresh = thresh
         self.key_size = key_size
+        self.dim = dim
         self._proj = self._create_proj(key_size, dim)
         self._stop_words = stop_words
 
@@ -51,37 +52,42 @@ class SemanticSimHash(object):
 
         return np.vstack((np.random.normal(0, 1, dim) for i in range(0, key_size)))
 
-    def _get_fasttext_encoding(self, txt: str) -> np.ndarray:
+    def _get_fasttext_encoding(self, documents: List[str]) -> np.ndarray:
         """Remove stop words, take average of the vectors of the remaining words and return it as representation of text."""
 
-        # remove punctuation and convert to lowercase
-        txt = txt.translate(str.maketrans('', '', string.punctuation)).lower()
+        doc_tokens = []
 
-        # remove stop words
-        tokens = [token for token in txt.split() if token not in self._stop_words]
+        for doc in documents[:]:
+            # remove punctuation and convert to lowercase
+            doc = doc.translate(str.maketrans('', '', string.punctuation)).lower()
 
-        if len(tokens) == 0:
-            raise Exception(f'Text is empty after filtering stop words and punctuation. The text was: {txt}')
+            # remove stop words
+            tokens = [token for token in doc.split() if token not in self._stop_words]
 
-        # average of vectors of tokens
-        doc_vec = np.average([self._model.get_word_vector(token) for token in tokens], axis=0)
+            if len(tokens) == 0:
+                raise Exception(f'Text is empty after filtering stop words and punctuation. The text was: {txt}')
 
-        return doc_vec
+            doc_tokens.append(tokens)
 
-    def _get_bert_encoding(self, txt: str) -> np.ndarray:
+            # average of vectors of tokens
+            doc_vecs = np.array([np.average([self._model.get_word_vector(token) for token in doc], axis=0) for doc in doc_tokens])
+
+        return doc_vecs
+
+    def _get_bert_encoding(self, documents: List[str]) -> np.ndarray:
         """Tokenize text, truncate to 512 tokens, encode and return embedding of CLS token as representation of the text"""
-        input_ids = torch.tensor(self._tokenizer.encode(txt, max_length=512)).unsqueeze(0)  # Batch size 1
-        last_layer_emb = self._model(input_ids)[0]
-        doc_vec = last_layer_emb[0][0].detach().numpy()  # return CLS token embedding as numpy array
+        input_ids = self._tokenizer(documents, padding=True, truncation=True, return_tensors='pt')['input_ids']
+        last_layer_emb = self._model(input_ids)[0][:, 0, :].squeeze(1).t()
+        doc_embs = last_layer_emb.detach().numpy()  # return CLS token embeddings as numpy array
 
-        return doc_vec
+        return doc_embs
 
-    def _get_encoding(self, text: str) -> np.ndarray:
+    def _get_encoding(self, documents: List[str]) -> np.ndarray:
         """Call proper function to get encoding of text according to model type"""
         if self._type == 'fasttext':
-            return self._get_fasttext_encoding(text)
+            return self._get_fasttext_encoding(documents)
         else:
-            return self._get_bert_encoding(text)
+            return self._get_bert_encoding(documents)
 
     def save(self, fname: str):
         """Dump all class members to file"""
@@ -96,29 +102,30 @@ class SemanticSimHash(object):
 
         return obj
 
-    def get_hash(self, txt: str) -> int:
+    def get_hash(self, documents: List[str]) -> List[int]:
         """Encode text, multiply with projection matrix, create hash and return it."""
-        enc = self._get_encoding(txt)
+        enc = self._get_encoding(documents)
         y = np.matmul(self._proj, enc)
         b = np.where(y <= self._thresh, 0, 1)  # assign binary values wrt threshold
-        hash_val = b.dot(2 ** np.arange(b.size)[::-1])  # convert binary array to integer
+        hash_vals = [b_vec.dot(2 ** np.arange(b_vec.size)[::-1]) for b_vec in b.T]  # convert binary array to integer
 
-        return hash_val
+        return hash_vals
 
-    def add_document(self, txt: str) -> int:
+    def add_document(self, documents: List[str]) -> List[int]:
         """Hash text, add to its bucket, return hash of text."""
-        h = self.get_hash(txt)
+        hashes = self.get_hash(documents)
 
-        if h in self._buckets:
-            self._buckets[h].append(txt)
-        else:
-            self._buckets[h] = [txt]
+        for h, txt in zip(hashes, documents):
+            if h in self._buckets:
+                self._buckets[h].append(txt)
+            else:
+                self._buckets[h] = [txt]
 
-        return h
+        return hashes
 
     def find_similar(self, txt: str) -> List[str]:
         """Hash text and return all texts inside that bucket."""
-        h = self.get_hash(txt)
+        h = self.get_hash([txt])[0]
         if h in self._buckets:
             return self._buckets[h]
         else:
@@ -126,7 +133,7 @@ class SemanticSimHash(object):
 
     def get_distance(self, txt0: str, txt1: str) -> int:
         """Return hamming distance of the hashes of given text pair."""
-        diff = self.get_hash(txt0) ^ self.get_hash(txt1)
+        diff = self.get_hash([txt0])[0] ^ self.get_hash([txt1])[0]
         diff &= (1 << self.key_size) - 1  # get 2's complement representation of negative numbers
         dist = sum(map(int, bin(diff)[2:]))  # [2:] to exclude '0b' part
         return dist
