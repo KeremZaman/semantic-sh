@@ -2,7 +2,7 @@ from setuptools import setup
 
 setup(
     name='semantic_sh',
-    version='1.2',
+    version='1.3',
     packages=['semantic_sh'],
     license='MIT',
     author='Kerem Zaman',
