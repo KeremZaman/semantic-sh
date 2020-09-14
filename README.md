@@ -52,7 +52,7 @@ sh = SemanticSimHash(model_type='fasttext', key_size=128, dim=300, model_path='p
 ### Hash your text
 
 ```
-sh.get_hash('<your_text>')
+sh.get_hash(['<your_text_0>', '<your_text_1>'])
 ```
 
 ### Add document
@@ -60,7 +60,7 @@ sh.get_hash('<your_text>')
 Add your document to the proper group
 
 ```
-sh.add_document('<your_text>')
+sh.add_document(['<your_text_0>', '<your_text_1>'])
 ```
 
 ###  Find similar
@@ -158,30 +158,117 @@ http_server.serve_forever()
 ## API Reference
 
 
-```GET /api/hash?text=<text>```
+```POST /api/hash```
 
-Return hash of given text 
+Return hashes of given documents 
 
+**Request Body**
+```
+{
+    "documents": [
+        "Here is the first document",
+        "and second document"
+    ]
+}       
+```
+
+**Response Body**
+```
+{
+    "hashes": [
+        "0x7f636944d8c8",
+        "0x5d134944428a4"
+    ]
+}    
+```
 ***
 
-```GET /api/add?text=<text>```
+```POST /api/add```
 
-Add given text as document and return hash of the text
+Add given documents and return hash and custom IDs of the documents
+
+**Request Body**
+```
+{
+    "documents": [
+        "Here is the first document",
+        "and second document"
+    ]
+}
+        
+```
+
+**Response Body**
+```
+{
+    "documents": [
+        {
+            "id": 1,
+            "hash": 0x5d134944428a4"
+        },
+        {
+            "id": 2,
+            "hash": 0x7f636944d8c8"
+        }
+    ]
+}     
+```
 ***
 
-```GET /api/find-similar?text=<text>```
+```POST /api/find-similar```
 
 Return similar documents to given text
+
+**Request Body**
+```
+{
+    "text": "Here is the text"
+}       
+```
+
+**Response Body**
+```
+{
+    "similar_texts": [
+        "Here is the text",
+        "First text here",
+        "Here is text"
+    ]
+}    
+```
+
 *** 
 
-```GET /api/distance?src=<src_text>&tgt=<tgt_txt>```
+```POST /api/distance?src=<src_text>&tgt=<tgt_txt>```
 
 Return Hamming distance between source and target texts
+
+**Request Body**
+```
+{
+    "src": "Here is the source text",
+    "tgt": "Target text for measuring distance"
+}       
+```
+
+**Response Body**
+```
+{
+    "distance": 21
+}    
+```
+
 ***
 
 ```GET /api/similarity-groups```
 
-Return buckets having more than one document
+Return buckets having more than one document ID
+
+***
+
+```GET /api/text/<int:id>```
+
+Return the document according to its ID
 
 ## With docker
 
@@ -205,7 +292,7 @@ represantation of the text.
 ## TO-DO
 
  - Add word2vec and GloVe support
- - Add batch processing for BERT models
+ - ~~Add batch processing for BERT models~~
  - ~~Fix import scheme~~
 
 License
