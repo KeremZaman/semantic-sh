@@ -19,7 +19,6 @@ $ pip install semantic-sh
 # Notes
 
   - Only fasttext and huggingface BERT models are supported for now.
-  - No batch processing support for now.
 
 
 # Usage
