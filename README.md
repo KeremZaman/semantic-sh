@@ -238,7 +238,7 @@ Return similar documents to given text
 
 *** 
 
-```POST /api/distance?src=<src_text>&tgt=<tgt_txt>```
+```POST /api/distance```
 
 Return Hamming distance between source and target texts
 
