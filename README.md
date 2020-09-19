@@ -6,6 +6,33 @@
 
 semantic-sh is a SimHash implementation to detect and group similar texts by taking power of word vectors and transformer-based language models such as BERT.
 
+Documentation
+=================
+
+<!--ts-->
+   * [Requirements](#requirements)
+   * [Installation](#installing-via-pip)
+   * [Usage](#usage)
+        * [Use with BERT](#use-with-bert)
+        * [Use with fasttext](#use-with-fasttext)
+        * [Use with GloVe](#use-with-glove)
+        * [Use with word2vec](#use-with-word2vec)
+      * [Additional parameters](#additional-parameters)
+      * [Text hashing](#hash-your-text)
+      * [Add document](#add-document)
+      * [Find similar documents](#find-similar)
+      * [Calculate Hamming Distance](#get-hamming-distance-between-2-texts)
+      * [Document groups](#go-through-all-document-groups)
+      * [Save](#save-data)
+      * [Load](#load-from-saved-file)
+   * [API Server](#api-server)
+      * [Installation](#installation)
+      * [Standalone usage](#standalone-usage)
+      * [Using with WSGI Container](#using-with-wsgi-container)
+      * [API Reference](#api-reference)
+      * [Docker](#with-docker)
+   * [Some Implementation Details](#some-implementation-details)
+<!--te-->
 
 
 # Requirements
