@@ -16,10 +16,6 @@ semantic-sh is a SimHash implementation to detect and group similar texts by tak
 ```sh
 $ pip install semantic-sh
 ```
-# Notes
-
-  - Only fasttext and huggingface BERT models are supported for now.
-
 
 # Usage
 
@@ -27,15 +23,26 @@ $ pip install semantic-sh
 from semantic_sh import SemanticSimHash
 ```
 
-### Use with fasttext:
-```
-sh = SemanticSimHash(model_type='fasttext', dim=300, model_path='pat_to_fasttext_vectors.bin')
-```
-
 ### Use with BERT:
 
 ```
 sh = SemanticSimHash(model_type='bert-base-multilingual-cased', dim=768)
+```
+
+### Use with fasttext:
+```
+sh = SemanticSimHash(model_type='fasttext', dim=300, model_path='/path/to/cc.en.300.bin')
+```
+
+### Use with GloVe:
+```
+sh = SemanticSimHash(model_type='glove', dim=300, model_path='/path/to/glove.6B.50d.txt')
+```
+
+### Use with word2vec:
+
+```
+sh = SemanticSimHash(model_type='word2vec', dim=300, model_path='/path/to/en.w2v.txt')
 ```
 
 ### Additional parameters
@@ -288,11 +295,6 @@ This is a simplified implementation of simhash by just creating random
 vectors and assigning 1 or 0 according to the result of dot product of each of these vectors with
 represantation of the text.  
 
-## TO-DO
-
- - Add word2vec and GloVe support
- - ~~Add batch processing for BERT models~~
- - ~~Fix import scheme~~
 
 License
 ----
