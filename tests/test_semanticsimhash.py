@@ -4,6 +4,7 @@ from semantic_sh import SemanticSimHash
 import fasttext.util
 import os
 
+
 class SemanticSimHashBaseTest:
 
     class BaseTest(unittest.TestCase):

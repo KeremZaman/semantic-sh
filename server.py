@@ -17,8 +17,8 @@ def init_app(**kwargs):
 @app.route('/api/hash', methods=['POST'])
 def generate_hash():
     req_json = request.get_json()
-    
     docs = req_json.get('documents')
+
     # convert negative hashes to 2's complement representation
     return jsonify({'hashes': [hex(h & (2**sh.key_size-1)) for h in sh.get_hash(docs)]})
 
@@ -62,8 +62,8 @@ if __name__ == '__main__':
     flask_group.add_argument('--port', required=False, default=80)
 
     model_group = parser.add_argument_group('model')
-    model_group.add_argument('--model-type', required=False, default='fasttext', help=f'Type of model to run: fasttext or any pretrained model name from huggingface/transformers')
-    model_group.add_argument('--model-path', required=False, help=f'Path to vector files of fasttext models')
+    model_group.add_argument('--model-type', required=False, default='fasttext', help='Type of model to run: fasttext or any pretrained model name from huggingface/transformers')
+    model_group.add_argument('--model-path', required=False, help='Path to vector files of fasttext models')
     model_group.add_argument('--key-size', required=False, type=int, default=256, help='Hash length in bits')
     model_group.add_argument('--dim', required=False, type=int, default=300, help='Dimension of text representations according to chosen model type')
     model_group.add_argument('--stop-words', nargs='*', help='List of stop words to exclude')

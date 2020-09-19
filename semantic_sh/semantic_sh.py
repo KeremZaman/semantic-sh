@@ -128,7 +128,7 @@ class SemanticSimHash(object):
             tokens = [token for token in doc.split() if token not in self._stop_words]
 
             if len(tokens) == 0:
-                raise Exception(f'Text is empty after filtering stop words and punctuation. The text was: {txt}')
+                raise Exception(f'Text is empty after filtering stop words and punctuation. The text was: {doc}')
 
             doc_tokens.append(tokens)
 
