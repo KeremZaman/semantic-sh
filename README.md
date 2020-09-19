@@ -1,5 +1,6 @@
 # semantic-sh
 [![PyPI version](https://badge.fury.io/py/semantic-sh.svg)](https://badge.fury.io/py/semantic-sh)
+[![Actions Status](https://github.com/KeremZaman/semantic-sh/workflows/build/badge.svg)](https://github.com/KeremZaman/semantic-sh/actions)
 
 semantic-sh is a SimHash implementation to detect and group similar texts by taking power of word vectors and transformer-based language models (BERT).
 
