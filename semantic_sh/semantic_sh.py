@@ -7,6 +7,7 @@ import string
 import os
 import errno
 import pickle
+import io
 
 from transformers import BertModel, BertTokenizer
 import fasttext
@@ -21,8 +22,7 @@ class SemanticSimHash(object):
         self._buckets = {}
         self._doc2id = {}
         self._documents = []
-
-        self._type = model_type
+        self._type = ''
 
         self._thresh = thresh
         self.key_size = key_size
@@ -30,22 +30,56 @@ class SemanticSimHash(object):
         self._proj = self._create_proj(key_size, dim)
         self._stop_words = stop_words
 
-        self._init_model(model_path)
+        self._init_model(model_type, model_path)
 
-    def _init_model(self, model_path: Optional[str]):
+    def _load_wordvec_model(self, emb_type: str, model_path: str):
+        """
+
+        :param emb_type:
+        :param model_path:
+        :return:
+        """
+        model = {}
+
+        fin = io.open(model_path, 'r', encoding='utf-8', newline='\n', errors='ignore')
+
+        if emb_type in ['fasttext', 'word2vec']:
+            vocab_size, dim = map(int, fin.readline().split())
+
+        for line in fin:
+            tokens = line.strip().split()
+            word, vec = tokens[0], np.expand_dims(np.fromiter(map(float, tokens[1:]), dtype=float), 1)  # (d, 1)
+
+            if vec.shape[0] != self.dim:
+                raise Exception('Mismatched dimensions')
+
+            model[word] = vec
+
+        fin.close()
+
+        return model
+
+    def _init_model(self, model_type: str, model_path: Optional[str]):
         """Load pretrained model and tokenizer if required."""
 
         print("Loading model...")
 
-        if self._type == 'fasttext':
+        if model_type in ['fasttext', 'glove', 'word2vec']:
+
             if model_path is None:
-                raise Exception('To use fasttext embeddings, model_path must be given.')
+                raise Exception('To use word embeddings, model_path must be given.')
             elif not os.path.isfile(model_path):
                 raise FileNotFoundError(errno.ENOENT, os.strerror(errno.ENOENT), model_path)
 
-            self._model = fasttext.load_model(model_path)
+            if model_type == 'fasttext' and model_path.endswith('.bin'):
+                self._model = fasttext.load_model(model_path)
+                self._type = 'fasttext_bin'
+            else:
+                self._model = self._load_wordvec_model(model_type, model_path)
+                self._type = 'wordvec'
 
         else:
+            self._type = model_type
             self._tokenizer = BertTokenizer.from_pretrained(self._type)
             self._model = BertModel.from_pretrained(self._type)
 
@@ -54,7 +88,7 @@ class SemanticSimHash(object):
 
         return np.vstack((np.random.normal(0, 1, dim) for i in range(0, key_size)))
 
-    def _get_fasttext_encoding(self, documents: List[str]) -> np.ndarray:
+    def _get_wordvec_encoding(self, documents: List[str]) -> np.ndarray:
         """Remove stop words, take average of the vectors of the remaining words and return it as representation of text."""
 
         doc_tokens = []
@@ -71,8 +105,15 @@ class SemanticSimHash(object):
 
             doc_tokens.append(tokens)
 
-            # average of vectors of tokens
-            doc_vecs = np.array([np.average([self._model.get_word_vector(token) for token in doc], axis=0) for doc in doc_tokens])
+        # average of vectors of tokens
+        doc_vecs = np.zeros((self.dim, len(doc_tokens)))
+
+        if self._type == 'fasttext_bin':
+            doc_vecs += np.array([np.average([self._model.get_word_vector(token) for token in doc], axis=0)
+                                  for doc in doc_tokens]).T
+        else:
+            doc_vecs += np.array([np.average([self._model[token] for token in doc if token in self._model], axis=0)
+                                  for doc in doc_tokens]).squeeze(axis=-1).T
 
         return doc_vecs
 
@@ -86,8 +127,8 @@ class SemanticSimHash(object):
 
     def _get_encoding(self, documents: List[str]) -> np.ndarray:
         """Call proper function to get encoding of text according to model type"""
-        if self._type == 'fasttext':
-            return self._get_fasttext_encoding(documents)
+        if self._type in ['fasttext_bin', 'wordvec']:
+            return self._get_wordvec_encoding(documents)
         else:
             return self._get_bert_encoding(documents)
 
