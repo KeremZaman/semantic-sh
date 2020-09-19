@@ -36,4 +36,5 @@ jobs:
         flake8 . --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics
     - name: Test with pytest
       run: |
-        python -m pytest
+        # Skip fasttext test since downloading binary model is impossible in Github action
+        python -m pytest -k 'not SemanticSimHashFasttextTest'
